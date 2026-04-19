@@ -13,6 +13,10 @@ static float zoomDist = 5.0f;
 static const float minZoom = 2.0f;
 static const float maxZoom = 20.0f;
 
+// Advanced rendering states
+static bool wireframeMode = false;
+static bool autoRotate = true;
+
 void display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
@@ -23,15 +27,49 @@ void display() {
     glRotatef(angleX, 1.0f, 0.0f, 0.0f);
     glRotatef(angleY, 0.0f, 1.0f, 0.0f);
 
-    glColor3f(1.0f, 0.0f, 1.0f); // white wireframe
-    glutWireTeapot(1.0);
+    if (wireframeMode) {
+        glDisable(GL_LIGHTING);
+        glColor3f(0.0f, 0.8f, 1.0f); // Bright cyan wireframe
+        glutWireTeapot(1.0);
+    } else {
+        glEnable(GL_LIGHTING);
+        
+        // Material Properties: Polished Gold appearance
+        GLfloat mat_ambient[]   = { 0.24725f, 0.1995f, 0.0745f, 1.0f };
+        GLfloat mat_diffuse[]   = { 0.75164f, 0.60648f, 0.22648f, 1.0f };
+        GLfloat mat_specular[]  = { 0.628281f, 0.555802f, 0.366065f, 1.0f };
+        GLfloat mat_shininess[] = { 51.2f };
+
+        glMaterialfv(GL_FRONT, GL_AMBIENT, mat_ambient);
+        glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
+        glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
+        glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
+
+        glutSolidTeapot(1.0);
+    }
 
     glutSwapBuffers();
 }
 
 void init() {
     glEnable(GL_DEPTH_TEST);
-    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+    glEnable(GL_NORMALIZE);
+    glShadeModel(GL_SMOOTH);
+
+    // Setup Light 0
+    GLfloat light_pos[] = { 10.0f, 10.0f, 10.0f, 1.0f };
+    GLfloat white_light[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    GLfloat ambient_light[] = { 0.2f, 0.2f, 0.2f, 1.0f };
+    
+    glLightfv(GL_LIGHT0, GL_POSITION, light_pos);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, white_light);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, white_light);
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient_light);
+
+    // Background color: Deep charcoal
+    glClearColor(0.05f, 0.05f, 0.08f, 1.0f);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 }
@@ -48,7 +86,7 @@ void reshape(int w, int h) {
 }
 
 void idle() {
-    // auto-rotate around Y axis
+    if (autoRotate && !leftButtonDown)
     angleY += 0.3f;
     if (angleY > 360.0f) angleY -= 360.0f;
     glutPostRedisplay();
@@ -112,7 +150,12 @@ void keyboard(unsigned char key, int x, int y) {
     } else if (key == '-') {
         zoomDist += 0.5f;
         if (zoomDist > maxZoom) zoomDist = maxZoom;
+    } else if (key == 'w' || key == 'W') {
+        wireframeMode = !wireframeMode;
+    } else if (key == ' ') {
+        autoRotate = !autoRotate;
     }
+    glutPostRedisplay();
 }
 
 int main(int argc, char** argv) {
