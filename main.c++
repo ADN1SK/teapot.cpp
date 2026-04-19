@@ -141,3 +141,4 @@ int main(int argc, char** argv) {
 
     return 0;
 }
+// Compile with: g++ main.cpp -o teapot -lGL -lGLU -lglut -ldl
