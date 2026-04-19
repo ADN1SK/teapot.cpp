@@ -44,6 +44,12 @@ Use this command to compile the demo on Linux:
 g++ main.c++ -o teapot -lGL -lGLU -lglut -ldl
 ```
 
+Or compile and run in one line:
+
+```bash
+g++ main.c++ -o teapot -lGL -lGLU -lglut -ldl && ./teapot
+```
+
 Then launch it with:
 
 ```bash
